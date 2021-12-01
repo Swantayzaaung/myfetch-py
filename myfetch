@@ -1,0 +1,96 @@
+#!/usr/bin/python3
+from re import search, split
+from os import walk, environ
+from os.path import exists
+from sys import argv, exit
+from socket import gethostname
+
+# Colors
+RED   = "\033[1;31m"  
+BLUE  = "\033[1;34m"
+CYAN  = "\033[1;36m"
+GREEN = "\033[0;32m"
+WHITE = "\033[0;37m"
+RESET = "\033[0;0m"
+BOLD    = "\033[;1m"
+REVERSE = "\033[;7m"
+
+# Default ASCII path
+ASCII_PATH = "/var/lib/myfetch/default.txt"
+
+def main():
+    if len(argv) == 2:
+        if exists(argv[1]):
+            if get_lines(argv[1]) < 5:
+                exit("Your text file is too small. Use one that has at least 6 lines.")
+            print_info(argv[1])
+        exit("ASCII file not found")
+    else:
+        print_info(ASCII_PATH)
+
+
+# Print ASCII + specs
+def print_info(filename):
+    i = 0
+    specs = [get_username(), get_distro(), get_cpu(), get_mem(), get_shell(), get_pkgs(), ""]
+    with open(filename, "r") as file:
+        maxlen = 0
+        lines = file.read().splitlines()
+        # Get the maximum length of a line
+        for line in lines:
+            if len(line) > maxlen:
+                maxlen = len(line)
+        for line in lines:
+            print(line, end="")
+            for j in range(maxlen - len(line)):
+                print(" ", end="")
+            print(f"    {specs[i]}")
+            if i < len(specs) - 1:
+                i += 1
+
+
+# Get number of lines i
+def get_lines(filename):
+    with open(filename, "r") as file:
+        for i, l in enumerate(file):
+            pass
+    return i + 1
+
+# Get username
+def get_username():
+    user = environ['USER']
+    host = gethostname()
+    return(f"{RED}{user}@{host}{WHITE}")
+
+# Get distro name
+def get_distro():
+    with open("/etc/os-release", "r") as file:
+        distro_info = file.read()
+        distro_name = search('"(.*)"', distro_info)
+        return(f"{BLUE}distro:{WHITE} {distro_name[1]}")
+
+# Get CPU name
+def get_cpu():
+    with open("/proc/cpuinfo", "r") as file:
+        cpu_info = file.read()
+        cpu_name = search(': (.*) CPU', cpu_info)
+        return(f"{BLUE}cpu:{WHITE}    {cpu_name[1]}")
+
+# Get memory available
+def get_mem():
+    with open("/proc/meminfo", "r") as file:
+        mem_info = file.read()
+        mem_free = round(int((search('MemFree: (.*) kB', mem_info))[1].strip())/1000)
+        mem_total = round(int((search('MemTotal: (.*) kB', mem_info))[1].strip())/1000)
+        return(f"{BLUE}mem:{WHITE}    {mem_free}MB/{mem_total}MB")
+
+# Get shell
+def get_shell():
+    return(f"{BLUE}shell:{WHITE}  {environ['SHELL']}")
+
+# Get number of packages
+def get_pkgs():
+    pkgs = len(next(walk("/var/lib/pacman/local"))[1])
+    return(f"{BLUE}pkgs:{WHITE}   {pkgs}")
+
+main()
