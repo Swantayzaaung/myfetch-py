@@ -4,13 +4,13 @@ A fetch tool written in python
 This is a small personal project. I wrote it cos I felt that neofetch was a bit too slow to run so I made my own fetch script. Feel free to use it as you wish. There aren't many options, though, as it's a simple script. 
 
 # Installation
-  git clone https://github.com/Swantayzaaung/myfetch-py
-  cd myfetch-py
-  ./setup.sh -i
+>git clone https://github.com/Swantayzaaung/myfetch-py
+>cd myfetch-py
+>setup.sh -i
 
 # Running 
-  Default ASCII: myfetch
-  Custom ASCII: myfetch /path/to/ascii.txt
+>Default ASCII: myfetch
+>Custom ASCII: myfetch /path/to/ascii.txt
 
 # TODO
 -Support other operating systems and multiple package managers
