@@ -16,10 +16,10 @@ This is a small personal project. I wrote it cos I felt that neofetch was a bit 
 >Custom ASCII: myfetch /path/to/ascii.txt
 
 # TODO
-*Support other operating systems and multiple package managers
+-Support other operating systems and multiple package managers
 
-*Support colored ASCII output
+-Support colored ASCII output
 
-*Support ASCII files shorter than 6 characters long
+-Support ASCII files shorter than 6 characters long
 
-If you have any solutions for these, please feel free to tell me or contribute.
+If you have any solutions for these, please feel free to tell me or contribute to this project.
