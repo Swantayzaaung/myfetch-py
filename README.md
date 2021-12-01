@@ -5,11 +5,14 @@ This is a small personal project. I wrote it cos I felt that neofetch was a bit 
 
 # Installation
 >git clone https://github.com/Swantayzaaung/myfetch-py
+
 >cd myfetch-py
+
 >setup.sh -i
 
 # Running 
 >Default ASCII: myfetch
+
 >Custom ASCII: myfetch /path/to/ascii.txt
 
 # TODO
