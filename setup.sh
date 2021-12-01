@@ -1,4 +1,17 @@
 #!/usr/bin/bash
+install_script() {
+    echo "Installing..."
+    chmod +x ./myfetch
+    if [[ -d /var/lib/myfetch ]]; then
+        sudo rm -rf /var/lib/myfetch
+        sudo mkdir /var/lib/myfetch
+    else
+        sudo mkdir /var/lib/myfetch
+    fi
+    sudo cp ./default.txt /var/lib/myfetch/default.txt
+    sudo cp ./myfetch /usr/bin/myfetch
+    echo "Installation complete!"
+}
 
 print_usage() {
   echo "Usage:"
@@ -8,14 +21,15 @@ print_usage() {
 }
 
 install() {
-    if [[ ! -d /var/lib/myfetch ]] && [[ ! -f /usr/bin/myfetch ]]; then
-        echo "Installing..."
-        sudo mkdir /var/lib/myfetch
-        sudo cp ./default.txt /var/lib/myfetch/default.txt
-        sudo cp ./myfetch /usr/bin/myfetch
-        echo "Installation complete!"
+    if [[ -d /var/lib/myfetch ]] && [[ -f /usr/bin/myfetch ]]; then
+        read -p "Myfetch is already installed. Do you wish to install again? [y/n] " -n 1 -r; echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit
+        else
+            install_script
+        fi
     else
-        echo "myfetch is already installed"
+        install_script
     fi
 }
 
@@ -26,11 +40,11 @@ uninstall() {
         sudo rm /usr/bin/myfetch
         echo "Uninstallation complete!"
     else
-        echo "myfetch isn't installed"
+        echo "Myfetch isn't installed"
     fi
 }
 
-while [ ! $# -eq 0 ]
+while [ $1 ]
 do
 	case "$1" in
 		--help | -h)

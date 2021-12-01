@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from re import search, split
-from os import walk, environ
-from os.path import exists
+from os import walk, environ, getenv, listdir
+from os.path import exists, join
 from sys import argv, exit
 from socket import gethostname
 
@@ -9,6 +9,7 @@ from socket import gethostname
 RED   = "\033[1;31m"  
 BLUE  = "\033[1;34m"
 CYAN  = "\033[1;36m"
+PURPLE = "\033[1;35m"
 GREEN = "\033[0;32m"
 WHITE = "\033[0;37m"
 RESET = "\033[0;0m"
@@ -28,10 +29,23 @@ def main():
     else:
         print_info(ASCII_PATH)
 
+# Find an executable on PATH
+def which(exe):
+    for dir in getenv("PATH").split(":"):
+        if exists(join(dir, exe)):
+            return True
+    return False
 
 # Print ASCII + specs
 def print_info(filename):
     i = 0
+    prefixes = [f"{RED}", 
+                f"{BLUE}distro: {WHITE}", 
+                f"{BLUE}cpu: {WHITE}", 
+                f"{BLUE}mem: {WHITE}", 
+                f"{BLUE}sh: {WHITE}", 
+                f"{BLUE}pkgs: {WHITE}", 
+                ""]
     specs = [get_username(), get_distro(), get_cpu(), get_mem(), get_shell(), get_pkgs(), ""]
     with open(filename, "r") as file:
         maxlen = 0
@@ -44,7 +58,7 @@ def print_info(filename):
             print(line, end="")
             for j in range(maxlen - len(line)):
                 print(" ", end="")
-            print(f"    {specs[i]}")
+            print(f"    {prefixes[i]}{specs[i]}{WHITE}")
             if i < len(specs) - 1:
                 i += 1
 
@@ -60,37 +74,46 @@ def get_lines(filename):
 def get_username():
     user = environ['USER']
     host = gethostname()
-    return(f"{RED}{user}@{host}{WHITE}")
+    return(f"{user}@{host}")
 
 # Get distro name
 def get_distro():
     with open("/etc/os-release", "r") as file:
         distro_info = file.read()
-        distro_name = search('"(.*)"', distro_info)
-        return(f"{BLUE}distro:{WHITE} {distro_name[1]}")
+        distro_name = distro_info.split('"')[1]
+        return(f"{distro_name}")
 
 # Get CPU name
 def get_cpu():
     with open("/proc/cpuinfo", "r") as file:
         cpu_info = file.read()
         cpu_name = search(': (.*) CPU', cpu_info)
-        return(f"{BLUE}cpu:{WHITE}    {cpu_name[1]}")
+        return(f"{cpu_name[1]}")
 
 # Get memory available
 def get_mem():
     with open("/proc/meminfo", "r") as file:
         mem_info = file.read()
-        mem_free = round(int((search('MemFree: (.*) kB', mem_info))[1].strip())/1000)
-        mem_total = round(int((search('MemTotal: (.*) kB', mem_info))[1].strip())/1000)
-        return(f"{BLUE}mem:{WHITE}    {mem_free}MB/{mem_total}MB")
+        mem_total,mem_free = mem_info.split("\n")[0:2]
+        mem_total = int(mem_total.split()[1]) >>10
+        mem_free = int(mem_free.split()[1])>>10
+        return(f"{mem_free}MB/{mem_total}MB")
 
 # Get shell
 def get_shell():
-    return(f"{BLUE}shell:{WHITE}  {environ['SHELL']}")
+    return(f"{environ['SHELL']}")
 
 # Get number of packages
 def get_pkgs():
-    pkgs = len(next(walk("/var/lib/pacman/local"))[1])
-    return(f"{BLUE}pkgs:{WHITE}   {pkgs}")
+    pkgs = 0
+    if which("pacman"):
+        pkgs = len(next(walk("/var/lib/pacman/local"))[1])
+    elif which("dpkg"):
+        for item in listdir("/var/lib/dpkg/info"):
+            if ".list" in item:
+                pkgs += 1
+    else:
+        pkgs = "Unknown"
+    return(f"{pkgs}")
 
 main()
