@@ -10,6 +10,7 @@ install_script() {
     fi
     sudo cp ./default.txt /var/lib/myfetch/default.txt
     sudo cp ./myfetch /usr/bin/myfetch
+    sudo chmod +x /usr/bin/myfetch
     echo "Installation complete!"
 }
 
